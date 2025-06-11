@@ -29,43 +29,9 @@ public class GatewayJwtTokenProvider {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
-            throw new RuntimeException("Invalid token", e);
+            throw new RuntimeException("Invalid JWT Token", e);
         }
-
     }
-
-    // access token 생성 메소드 (claim에 userId 추가)
-    public String createToken(String username, String role, Long userId) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpiration);
-        return Jwts.builder()
-                .subject(username)
-                .claim("role", role)
-                .claim("userId", userId)
-                .issuedAt(now)
-                .expiration(expiryDate)
-                .signWith(secretKey)
-                .compact();
-    }
-
-    // refresh token 생성 메소드 (claim에 userId 추가)
-    public String createRefreshToken(String username, String role, Long userId) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtRefreshExpiration);
-        return Jwts.builder()
-                .subject(username)
-                .claim("role", role)
-                .claim("userId", userId)
-                .issuedAt(now)
-                .expiration(expiryDate)
-                .signWith(secretKey)
-                .compact();
-    }
-
-//    public long getRefreshExpiration() {
-//        return jwtRefreshExpiration;
-//    }
-
 
     public Long getUserIdFromJWT(String token) {
         Claims claims = Jwts.parser()
