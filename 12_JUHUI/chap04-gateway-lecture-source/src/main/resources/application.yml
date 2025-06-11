@@ -7,30 +7,12 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: 1st-service
-          # uri? http://ip:port? ?? ???? ??? ? ???
-          # ????? ??? ?? ???? ???? service name?? ????.
-          # lb:// ? ??? ????? ???? ??
-          uri: lb://1ST-SERVICE
+        - id: user-service
+          uri: lb://SWCAMP-USER-SERVICE
           predicates:
-            # ??? ??? ??? ?? ? ?? ??? ??? ?? ???.
-            - Path=/first-service/**
-          # ?? ????? ???? ?? ?? ?? ??? filter ??? ? ? ??.
+            - Path=/api/v1/user-service/**
           filters:
-            # /first-service/health ??? /health? ????? ??
-            - RewritePath=/first-service/(?<segment>.*), /$\{segment}
-            # ?? : 'first-request'??? 'first-request-value'?? ???? ??
-            - AddRequestHeader=first-request, first-request-value
-            # ?? : 'first-response'??? 'first-response-value'?? ???? ??
-            - AddResponseHeader=first-response, first-response-value
-        - id: 2st-service
-          uri: lb://2ST-SERVICE
-          predicates:
-            - Path=/second-service/**
-          filters:
-            - RewritePath=/second-service/(?<segment>.*), /$\{segment}
-            - AddRequestHeader=second-request, second-request-value
-            - AddResponseHeader=second-response, second-response-value
+            - RewritePath=/api/v1/user-service/(?<segment>.*), /$\{segment}
 
 eureka:
   client:
@@ -38,3 +20,6 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka
+
+jwt:
+  secret: LH9QZL8upsPBfuDY+Dkb1kT9DZIIUSuA2u4O6Lfi3mkEfeWtETpVTcR/8SMZdJWn/xNTuCQBE6rBvDXgnVmscQ==
