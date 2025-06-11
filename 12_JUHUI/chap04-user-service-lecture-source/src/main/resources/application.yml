@@ -41,7 +41,12 @@ mybatis:
 #  expiration: 1800000
 #  refresh-expiration: 604800000
 
-
+### actuator 엔드포인트의 노출 여부 제어
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,beans,httpexchanges
 
 
 

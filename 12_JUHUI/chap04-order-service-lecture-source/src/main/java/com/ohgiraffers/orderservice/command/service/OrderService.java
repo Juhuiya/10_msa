@@ -5,6 +5,7 @@ import com.ohgiraffers.orderservice.command.dto.OrderDTO;
 import com.ohgiraffers.orderservice.command.entity.Order;
 import com.ohgiraffers.orderservice.command.repository.OrderRepository;
 //import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ public class OrderService {
     private final UserClient userClient;
     private final ModelMapper modelMapper;
 
+    @CircuitBreaker(name = "userServiceCB", fallbackMethod = "fallbackGetUserGrade")
     public OrderDTO createOrder(OrderDTO orderDTO, Long userId) {
         // userId를 직접 사용해 주문 생성 전에 사용자의 등급을 알아올 수 있음
         String userStatus = userClient.getUserGrade(userId).getData();
@@ -28,6 +30,18 @@ public class OrderService {
 
         // 주문 생성 로직
         if("PREMIUM".equals(userStatus)) orderDTO.setPrice(orderDTO.getPrice() * 0.9);
+        Order order = modelMapper.map(orderDTO, Order.class);
+        order.createOrder(userId, LocalDateTime.now());
+        Order savedOrder = orderRepository.save(order);
+
+        orderDTO.setId(savedOrder.getId());
+        orderDTO.setOrderDate(savedOrder.getOrderDate());
+        return orderDTO;
+    }
+
+    public OrderDTO fallbackGetUserGrade(OrderDTO orderDTO, Long userId, Throwable t) {
+        // User Service 의 장애가 발생한 경우 기본 등급을 사용하거나 할인없이 주문 처리하도록
+        // fallback method 를 작성한다.
         Order order = modelMapper.map(orderDTO, Order.class);
         order.createOrder(userId, LocalDateTime.now());
         Order savedOrder = orderRepository.save(order);
